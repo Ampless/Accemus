@@ -6,9 +6,6 @@ Future<int> main(List<String> args) async {
     print('Usage: accemus [username] [password]');
     return 1;
   }
-  final http = ScHttpClient();
-  print(
-    Plan.plansToJson(await getAllSubs(args[0], args[1], http.get, http.post)),
-  );
+  print(Plan.plansToJson(await getAllSubs(args[0], args[1], ScHttpClient())));
   return 0;
 }
