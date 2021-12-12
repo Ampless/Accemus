@@ -1,3 +1,5 @@
+// TODO: testing
+
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
@@ -6,7 +8,6 @@ import 'package:dsbuntis/dsbuntis.dart';
 
 void main(List<String> argv) async {
   final parser = ArgParser()
-    // TODO: --help
     ..addOption('session',
         abbr: 's',
         help: 'The session to be used instead of logging in',
@@ -37,11 +38,18 @@ void main(List<String> argv) async {
         valueHelp: 'value',
         defaultsTo: Session.defaultBundleId)
     ..addFlag('login-only',
-        abbr: 'l', help: 'Only log in and print the session', negatable: false);
+        abbr: 'l', help: 'Only log in and print the session', negatable: false)
+    ..addFlag('help',
+        abbr: 'h', help: 'Display available options', negatable: false);
 
   try {
     final args = parser.parse(argv);
-    if (args['login-only']) {
+    if (args['help']) {
+      stderr.writeln('${Platform.executable} [options] [username] [password]');
+      stderr.writeln('${Platform.executable} [options] -s [session]');
+      stderr.writeln();
+      stderr.writeln(parser.usage);
+    } else if (args['login-only']) {
       if (args.wasParsed('session')) {
         throw 'You can\'t log in with a session.';
       }
@@ -58,7 +66,6 @@ void main(List<String> argv) async {
           osVersion: args['os-version'],
           previewEndpoint: args['preview-endpoint']);
       print(session.token);
-      return;
     } else {
       if (!args.wasParsed('session') && args.rest.length != 2) {
         throw 'No credentials or session provided.';
@@ -79,7 +86,11 @@ void main(List<String> argv) async {
       }
     }
   } catch (e) {
+    stderr.writeln('${Platform.executable} [options] [username] [password]');
+    stderr.writeln('${Platform.executable} [options] -s [session]');
+    stderr.writeln();
     stderr.writeln(parser.usage);
+    stderr.writeln();
     stderr.writeln((AnsiPen()..red())(e));
     exitCode = 1;
     return;
