@@ -10,6 +10,11 @@ void main(List<String> argv) async {
         abbr: 'e',
         help: 'the endpoint to use',
         defaultsTo: Session.defaultEndpoint)
+    ..addOption('preview-endpoint',
+        abbr: 'p', defaultsTo: Session.defaultPreviewEndpoint)
+    ..addOption('app-version', abbr: 'a', defaultsTo: Session.defaultAppVersion)
+    ..addOption('os-version', abbr: 'o', defaultsTo: Session.defaultOsVersion)
+    ..addOption('bundle-id', abbr: 'b', defaultsTo: Session.defaultBundleId)
     ..addFlag('login-only',
         abbr: 'l', help: 'only logs in and prints the session');
   final args = parser.parse(argv);
@@ -20,7 +25,11 @@ void main(List<String> argv) async {
       return;
     }
     final session = await Session.login(args.rest[0], args.rest[1],
-        endpoint: args['endpoint']);
+        endpoint: args['endpoint'],
+        appVersion: args['app-version'],
+        bundleId: args['bundle-id'],
+        osVersion: args['os-version'],
+        previewEndpoint: args['preview-endpoint']);
     print(session.token);
     return;
   } else {
@@ -30,9 +39,15 @@ void main(List<String> argv) async {
       return;
     }
     final session = args.wasParsed('session')
-        ? Session(args['session'], endpoint: args['endpoint'])
+        ? Session(args['session'],
+            endpoint: args['endpoint'],
+            previewEndpoint: args['preview-endpoint'])
         : await Session.login(args.rest[0], args.rest[1],
-            endpoint: args['endpoint']);
+            endpoint: args['endpoint'],
+            previewEndpoint: args['preview-endpoint'],
+            appVersion: args['app-version'],
+            osVersion: args['os-version'],
+            bundleId: args['bundle-id']);
     final json = await session.getTimetableJson();
     for (final p in parsePlans(session.downloadPlans(json))) {
       print(await p);
