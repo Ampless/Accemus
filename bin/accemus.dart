@@ -6,19 +6,39 @@ import 'package:dsbuntis/dsbuntis.dart';
 
 void main(List<String> argv) async {
   final parser = ArgParser()
-    // TODO: a lot more help for all of these
-    ..addOption('session', abbr: 's', help: 'skips the login')
+    // TODO: --help
+    ..addOption('session',
+        abbr: 's',
+        help: 'The session to be used instead of logging in',
+        valueHelp: 'token')
     ..addOption('endpoint',
         abbr: 'e',
-        help: 'the endpoint to use',
+        help: 'The endpoint to use',
+        valueHelp: 'backend',
         defaultsTo: Session.defaultEndpoint)
     ..addOption('preview-endpoint',
-        abbr: 'p', defaultsTo: Session.defaultPreviewEndpoint)
-    ..addOption('app-version', abbr: 'a', defaultsTo: Session.defaultAppVersion)
-    ..addOption('os-version', abbr: 'o', defaultsTo: Session.defaultOsVersion)
-    ..addOption('bundle-id', abbr: 'b', defaultsTo: Session.defaultBundleId)
+        abbr: 'p',
+        help: 'The endpoint to use for previews',
+        valueHelp: 'backend',
+        defaultsTo: Session.defaultPreviewEndpoint)
+    ..addOption('app-version',
+        abbr: 'a',
+        help: 'The DSBMobile version to report to the server',
+        valueHelp: 'value',
+        defaultsTo: Session.defaultAppVersion)
+    ..addOption('os-version',
+        abbr: 'o',
+        help: 'The OS version to report to the server',
+        valueHelp: 'value',
+        defaultsTo: Session.defaultOsVersion)
+    ..addOption('bundle-id',
+        abbr: 'b',
+        help: 'The bundle id to report to the server',
+        valueHelp: 'value',
+        defaultsTo: Session.defaultBundleId)
     ..addFlag('login-only',
-        abbr: 'l', help: 'only logs in and prints the session');
+        abbr: 'l', help: 'Only log in and print the session', negatable: false);
+
   try {
     final args = parser.parse(argv);
     if (args['login-only']) {
