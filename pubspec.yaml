@@ -10,6 +10,8 @@ dependencies:
   ansicolor: ^2.0.1
   args: ^2.3.0
   dsbuntis: ^7.1.0
+  hex: ^0.2.0
+  highlight: ^0.7.0
 
 dev_dependencies:
   lints: ^1.0.1

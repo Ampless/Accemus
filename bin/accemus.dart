@@ -1,10 +1,103 @@
 // TODO: testing
 
+import 'dart:convert' show JsonEncoder;
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:args/args.dart';
 import 'package:dsbuntis/dsbuntis.dart';
+import 'package:hex/hex.dart';
+import 'package:highlight/highlight.dart';
+import 'package:schttp/schttp.dart';
+
+String skrcli(Result r) {
+  var str = '';
+
+  void _traverse(Node node, int? color) {
+    if (node.className != null &&
+        ((node.value != null && node.value!.isNotEmpty) ||
+            (node.children != null && node.children!.isNotEmpty))) {
+      color = node.className.hashCode % 256;
+    }
+
+    if (node.value != null) {
+      str +=
+          color != null ? (AnsiPen()..xterm(color))(node.value!) : node.value!;
+    } else if (node.children != null) {
+      node.children!.forEach((c) => _traverse(c, color));
+    }
+  }
+
+  r.nodes!.forEach((c) => _traverse(c, null));
+  return str;
+}
+
+const jsonEncoder = JsonEncoder.withIndent('  ');
+String jsonEncode(Object o) => jsonEncoder.convert(o);
+
+class LogHttpClient extends ScHttpClient {
+  @override
+  Future<Uint8List> getBinUri(Uri url,
+      {bool readCache = true, bool writeCache = true, Duration? ttl}) async {
+    final res = await super
+        .getBinUri(url, readCache: readCache, writeCache: writeCache, ttl: ttl);
+    print((AnsiPen()..green())('GET_BIN') +
+        ' ' +
+        (AnsiPen()..yellow())(url) +
+        ' → ' +
+        HEX.encode(res));
+    return res;
+  }
+
+  @override
+  Future<String> getUri(Uri url,
+      {bool readCache = true,
+      bool writeCache = true,
+      Duration? ttl,
+      Map<String, String> headers = const {},
+      String Function(List<int>)? defaultCharset,
+      String Function(List<int>)? forcedCharset}) async {
+    final res = await super.getUri(url,
+        readCache: readCache,
+        writeCache: writeCache,
+        ttl: ttl,
+        headers: headers,
+        defaultCharset: defaultCharset,
+        forcedCharset: forcedCharset);
+    print((AnsiPen()..green())('GET') +
+        ' ' +
+        (AnsiPen()..yellow())(url) +
+        ' → ' +
+        res);
+    return res;
+  }
+
+  @override
+  Future<String> postUri(Uri url, Object body,
+      {Map<String, String> headers = const {},
+      bool readCache = true,
+      bool writeCache = true,
+      Duration? ttl,
+      String Function(List<int>)? defaultCharset,
+      String Function(List<int>)? forcedCharset}) async {
+    final res = await super.postUri(url, body,
+        readCache: readCache,
+        writeCache: writeCache,
+        ttl: ttl,
+        headers: headers,
+        defaultCharset: defaultCharset,
+        forcedCharset: forcedCharset);
+    print((AnsiPen()..green())('POST') +
+        ' ' +
+        (AnsiPen()..yellow())(url) +
+        ' → ' +
+        (AnsiPen()..magenta())(url) +
+        ' → ' +
+        res);
+    return res;
+  }
+}
 
 void main(List<String> argv) async {
   final parser = ArgParser()
@@ -40,10 +133,23 @@ void main(List<String> argv) async {
     ..addFlag('login-only',
         abbr: 'l', help: 'Only log in and print the session', negatable: false)
     ..addFlag('help',
-        abbr: 'h', help: 'Display available options', negatable: false);
+        abbr: 'h', help: 'Display available options', negatable: false)
+    ..addFlag('stack-traces',
+        abbr: 't',
+        help: 'Print full stack traces when an error occurs',
+        negatable: false)
+    ..addFlag('timetable-json',
+        abbr: 'j',
+        help: 'Only log in, get the timetable json and print it',
+        negatable: false)
+    ..addFlag('log-requests',
+        abbr: 'r', help: 'Log all HTTP requests', negatable: false);
 
+  var traces = false;
   try {
     final args = parser.parse(argv);
+    final http = args['log-requests'] ? LogHttpClient() : ScHttpClient();
+    traces = args['stack-traces'];
     if (args['help']) {
       stderr.writeln('${Platform.executable} [options] [username] [password]');
       stderr.writeln('${Platform.executable} [options] -s [session]');
@@ -60,6 +166,7 @@ void main(List<String> argv) async {
         throw 'No password provided.';
       }
       final session = await Session.login(args.rest[0], args.rest[1],
+          http: http,
           endpoint: args['endpoint'],
           appVersion: args['app-version'],
           bundleId: args['bundle-id'],
@@ -72,17 +179,26 @@ void main(List<String> argv) async {
       }
       final session = args.wasParsed('session')
           ? Session(args['session'],
+              http: http,
               endpoint: args['endpoint'],
               previewEndpoint: args['preview-endpoint'])
           : await Session.login(args.rest[0], args.rest[1],
+              http: http,
               endpoint: args['endpoint'],
               previewEndpoint: args['preview-endpoint'],
               appVersion: args['app-version'],
               osVersion: args['os-version'],
               bundleId: args['bundle-id']);
-      final json = await session.getTimetableJson();
-      for (final p in parsePlans(session.downloadPlans(json))) {
-        print(await p);
+      if (args['timetable-json']) {
+        print(skrcli(highlight.parse(await session.getTimetableJsonString(),
+            language: 'json')));
+      } else {
+        print(skrcli(highlight.parse(
+            jsonEncode((await Future.wait(parsePlans(
+                    session.downloadPlans(await session.getTimetableJson()))))
+                .where((e) => e != null)
+                .toList()),
+            language: 'json')));
       }
     }
   } catch (e) {
@@ -91,7 +207,8 @@ void main(List<String> argv) async {
     stderr.writeln();
     stderr.writeln(parser.usage);
     stderr.writeln();
-    stderr.writeln((AnsiPen()..red())(e));
+    stderr.writeln(
+        (AnsiPen()..red())(traces && e is Error ? '$e\n\n${e.stackTrace}' : e));
     exitCode = 1;
     return;
   }
