@@ -39,9 +39,15 @@ String jsonEncode(Object o) => jsonEncoder.convert(o);
 class LogHttpClient extends ScHttpClient {
   @override
   Future<Uint8List> getBinUri(Uri url,
-      {bool readCache = true, bool writeCache = true, Duration? ttl}) async {
-    final res = await super
-        .getBinUri(url, readCache: readCache, writeCache: writeCache, ttl: ttl);
+      {Map<String, String> headers = const {},
+      bool readCache = true,
+      bool writeCache = true,
+      Duration? ttl}) async {
+    final res = await super.getBinUri(url,
+        headers: headers,
+        readCache: readCache,
+        writeCache: writeCache,
+        ttl: ttl);
     print((AnsiPen()..green())('GET_BIN') +
         ' ' +
         (AnsiPen()..yellow())(url) +
@@ -151,8 +157,8 @@ void main(List<String> argv) async {
     final http = args['log-requests'] ? LogHttpClient() : ScHttpClient();
     traces = args['stack-traces'];
     if (args['help']) {
-      stderr.writeln('${Platform.executable} [options] [username] [password]');
-      stderr.writeln('${Platform.executable} [options] -s [session]');
+      stderr.writeln('accemus [options] [username] [password]');
+      stderr.writeln('accemus [options] -s [session]');
       stderr.writeln();
       stderr.writeln(parser.usage);
     } else if (args['login-only']) {
@@ -202,8 +208,8 @@ void main(List<String> argv) async {
       }
     }
   } catch (e) {
-    stderr.writeln('${Platform.executable} [options] [username] [password]');
-    stderr.writeln('${Platform.executable} [options] -s [session]');
+    stderr.writeln('accemus [options] [username] [password]');
+    stderr.writeln('accemus [options] -s [session]');
     stderr.writeln();
     stderr.writeln(parser.usage);
     stderr.writeln();
