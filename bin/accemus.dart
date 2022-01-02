@@ -207,6 +207,7 @@ void main(List<String> argv) async {
             language: 'json')));
       }
     }
+    exit(0);
   } catch (e) {
     stderr.writeln('accemus [options] [username] [password]');
     stderr.writeln('accemus [options] -s [session]');
@@ -215,7 +216,6 @@ void main(List<String> argv) async {
     stderr.writeln();
     stderr.writeln(
         (AnsiPen()..red())(traces && e is Error ? '$e\n\n${e.stackTrace}' : e));
-    exitCode = 1;
-    return;
+    exit(1);
   }
 }

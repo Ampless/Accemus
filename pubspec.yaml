@@ -1,7 +1,7 @@
 name: accemus
 description: A CLI tool for fetching substitution plans from DSB/DSBMobile and
   parsing Untis, as well as debugging dsbuntis.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/Ampless/Accemus
 
 environment:
@@ -13,7 +13,7 @@ executables:
 dependencies:
   ansicolor: ^2.0.1
   args: ^2.3.0
-  dsbuntis: ^7.1.0
+  dsbuntis: ^7.1.1
   hex: ^0.2.0
   highlight: ^0.7.0
   schttp: ^4.1.0
