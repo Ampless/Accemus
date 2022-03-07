@@ -1,6 +1,6 @@
 // TODO: testing
 
-import 'dart:convert' show JsonEncoder;
+import 'dart:convert' show JsonEncoder, jsonDecode;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -96,7 +96,7 @@ class LogHttpClient extends ScHttpClient {
         forcedCharset: forcedCharset);
     print((AnsiPen()..green())('POST') +
         ' ' +
-        (AnsiPen()..yellow())(url) +
+        (AnsiPen()..yellow())(body) +
         ' → ' +
         (AnsiPen()..magenta())(url) +
         ' → ' +
@@ -196,8 +196,15 @@ void main(List<String> argv) async {
               osVersion: args['os-version'],
               bundleId: args['bundle-id']);
       if (args['timetable-json']) {
-        print(skrcli(highlight.parse(await session.getTimetableJsonString(),
-            language: 'json')));
+        var ttJson = await session.getTimetableJsonString();
+        try {
+          ttJson = jsonEncode(jsonDecode(ttJson));
+        } catch (e) {
+          stderr.writeln((AnsiPen()..red())(
+              'Timetable JSON is actually not valid JSON: ' +
+                  (traces && e is Error ? '$e\n\n${e.stackTrace}' : '$e')));
+        }
+        print(skrcli(highlight.parse(ttJson, language: 'json')));
       } else {
         print(skrcli(highlight.parse(
             jsonEncode((await Future.wait(parsePlans(
