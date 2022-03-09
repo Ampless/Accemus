@@ -1,3 +1,8 @@
+## 0.1.3
+
+- Added the `--json`/`-J` option for getting JSONs other than the Timetable one.
+This option is temporary and might be renamed, as well as `--timetable-json`/`-j`
+
 ## 0.1.2
 
 - `--timetable-json`/`-j` now tries to prettify the Timetable JSON, if it can't,

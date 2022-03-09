@@ -144,10 +144,12 @@ void main(List<String> argv) async {
         abbr: 't',
         help: 'Print full stack traces when an error occurs',
         negatable: false)
+    // TODO: change these 2 to make more sense
     ..addFlag('timetable-json',
         abbr: 'j',
-        help: 'Only log in, get the timetable json and print it',
+        help: 'Only log in, get the Timetable JSON and print it',
         negatable: false)
+    ..addOption('json', abbr: 'J', help: 'Get a JSON by name')
     ..addFlag('log-requests',
         abbr: 'r', help: 'Log all HTTP requests', negatable: false);
 
@@ -195,16 +197,18 @@ void main(List<String> argv) async {
               appVersion: args['app-version'],
               osVersion: args['os-version'],
               bundleId: args['bundle-id']);
-      if (args['timetable-json']) {
-        var ttJson = await session.getTimetableJsonString();
+      if (args['timetable-json'] || args.wasParsed('json')) {
+        var json = args['timetable-json']
+            ? await session.getTimetableJsonString()
+            : await session.getJsonString(args['json']);
         try {
-          ttJson = jsonEncode(jsonDecode(ttJson));
+          json = jsonEncode(jsonDecode(json));
         } catch (e) {
           stderr.writeln((AnsiPen()..red())(
               'Timetable JSON is actually not valid JSON: ' +
                   (traces && e is Error ? '$e\n\n${e.stackTrace}' : '$e')));
         }
-        print(skrcli(highlight.parse(ttJson, language: 'json')));
+        print(skrcli(highlight.parse(json, language: 'json')));
       } else {
         print(skrcli(highlight.parse(
             jsonEncode((await Future.wait(parsePlans(
