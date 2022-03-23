@@ -1,3 +1,7 @@
+## 0.2.0-alpha.0
+
+- Attempt at making dsbuntis 8.0.0-alpha.2 work
+
 ## 0.1.3
 
 - Added the `--json`/`-J` option for getting JSONs other than the Timetable one.

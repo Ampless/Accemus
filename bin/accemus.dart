@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:args/args.dart';
+import 'package:dsb/dsb.dart';
 import 'package:dsbuntis/dsbuntis.dart';
 import 'package:hex/hex.dart';
 import 'package:highlight/highlight.dart';
@@ -210,9 +211,12 @@ void main(List<String> argv) async {
         }
         print(skrcli(highlight.parse(json, language: 'json')));
       } else {
+        // TODO: figure out how to put something into dsbuntis
+        //       that makes all of this easier (because it's in general useful)
         print(skrcli(highlight.parse(
-            jsonEncode((await Future.wait(parsePlans(
-                    session.downloadPlans(await session.getTimetableJson()))))
+            jsonEncode((await Future.wait(session
+                    .downloadPlans(await session.getTimetableJson())
+                    .map((p) => p.parse())))
                 .where((e) => e != null)
                 .toList()),
             language: 'json')));
