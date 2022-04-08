@@ -200,7 +200,7 @@ void main(List<String> argv) async {
               bundleId: args['bundle-id']);
       if (args['timetable-json'] || args.wasParsed('json')) {
         var json = args['timetable-json']
-            ? await session.getTimetableJsonString()
+            ? await session.getTimetablesJsonString()
             : await session.getJsonString(args['json']);
         try {
           json = jsonEncode(jsonDecode(json));
@@ -215,9 +215,11 @@ void main(List<String> argv) async {
         //       that makes all of this easier (because it's in general useful)
         print(skrcli(highlight.parse(
             jsonEncode((await Future.wait(session
-                    .downloadPlans(await session.getTimetableJson())
-                    .map((p) => p.parse())))
-                .where((e) => e != null)
+                    .downloadPlans(await session.getTimetablesJson())
+                    .map(
+                      (p) => Future.wait(p.map((p) => p.parse()))
+                          .then((v) => v.where((e) => e != null)),
+                    )))
                 .toList()),
             language: 'json')));
       }
