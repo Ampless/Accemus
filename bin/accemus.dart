@@ -214,12 +214,12 @@ void main(List<String> argv) async {
         // TODO: figure out how to put something into dsbuntis
         //       that makes all of this easier (because it's in general useful)
         print(skrcli(highlight.parse(
-            jsonEncode((await Future.wait(session
-                    .downloadPlans(await session.getTimetablesJson())
-                    .map(
-                      (p) => Future.wait(p.map((p) => p.parse()))
-                          .then((v) => v.where((e) => e != null)),
-                    )))
+            jsonEncode((await Future.wait(
+                    session.downloadPlans(await session.getTimetables()).map(
+                          (p) => Future.wait(p.map((p) => p.parse()))
+                              .then((v) => v.where((e) => e != null)),
+                        )))
+                .map((e) => e.toList())
                 .toList()),
             language: 'json')));
       }

@@ -1,6 +1,6 @@
-## 0.2.0-alpha.1
+## 0.2.0-alpha.2
 
-- Attempt at making dsbuntis 8.0.0-alpha.4 work
+- Attempt at making dsbuntis 8.0.0-alpha.6 work
 
 ## 0.1.3
 
