@@ -145,12 +145,10 @@ void main(List<String> argv) async {
         abbr: 't',
         help: 'Print full stack traces when an error occurs',
         negatable: false)
-    // TODO: change these 2 to make more sense
-    ..addFlag('timetable-json',
-        abbr: 'j',
-        help: 'Only log in, get the Timetable JSON and print it',
-        negatable: false)
-    ..addOption('json', abbr: 'J', help: 'Get a JSON by name')
+    ..addOption('json', abbr: 'j', help: 'Get a JSON by name')
+    // TODO: timetable, documents and news
+    ..addFlag('merge',
+        abbr: 'm', help: 'Merge all pages from each plan', negatable: false)
     ..addFlag('log-requests',
         abbr: 'r', help: 'Log all HTTP requests', negatable: false);
 
@@ -198,10 +196,8 @@ void main(List<String> argv) async {
               appVersion: args['app-version'],
               osVersion: args['os-version'],
               bundleId: args['bundle-id']);
-      if (args['timetable-json'] || args.wasParsed('json')) {
-        var json = args['timetable-json']
-            ? await session.getTimetablesJsonString()
-            : await session.getJsonString(args['json']);
+      if (args.wasParsed('json')) {
+        var json = await session.getJsonString(args['json']);
         try {
           json = jsonEncode(jsonDecode(json));
         } catch (e) {
@@ -211,10 +207,10 @@ void main(List<String> argv) async {
         }
         print(skrcli(highlight.parse(json, language: 'json')));
       } else {
+        final p =
+            await session.getTimetables().then(session.downloadAndParsePlans);
         print(skrcli(highlight.parse(
-            jsonEncode((await session
-                    .downloadAndParsePlans(await session.getTimetables()))
-                .toNestedList()),
+            jsonEncode(args['merge'] ? p.merge().toList() : p.toNestedList()),
             language: 'json')));
       }
     }

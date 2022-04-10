@@ -1,7 +1,9 @@
-## 0.2.0-alpha.3
+## 0.2.0-alpha.4
 
 - Attempt at making `dsbuntis` 8.0.0-alpha.8 work
 - Simplified code because of new functions in `dsbuntis`
+- Changed `--json` abbr to `-j`
+- Added `--merge`/`-m` flag
 
 ## 0.1.3
 
