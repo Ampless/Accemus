@@ -1,6 +1,7 @@
-## 0.2.0-alpha.2
+## 0.2.0-alpha.3
 
-- Attempt at making dsbuntis 8.0.0-alpha.6 work
+- Attempt at making `dsbuntis` 8.0.0-alpha.8 work
+- Simplified code because of new functions in `dsbuntis`
 
 ## 0.1.3
 

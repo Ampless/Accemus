@@ -211,16 +211,10 @@ void main(List<String> argv) async {
         }
         print(skrcli(highlight.parse(json, language: 'json')));
       } else {
-        // TODO: figure out how to put something into dsbuntis
-        //       that makes all of this easier (because it's in general useful)
         print(skrcli(highlight.parse(
-            jsonEncode((await Future.wait(
-                    session.downloadPlans(await session.getTimetables()).map(
-                          (p) => Future.wait(p.map((p) => p.parse()))
-                              .then((v) => v.where((e) => e != null)),
-                        )))
-                .map((e) => e.toList())
-                .toList()),
+            jsonEncode((await session
+                    .downloadAndParsePlans(await session.getTimetables()))
+                .toNestedList()),
             language: 'json')));
       }
     }
